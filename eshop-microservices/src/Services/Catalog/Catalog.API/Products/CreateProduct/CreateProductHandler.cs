@@ -38,8 +38,6 @@ namespace Catalog.API.Products.CreateProduct
 
             session.Store(product);
             await session.SaveChangesAsync(cancellationToken);
-            //todo
-            //save to database
             return new CreateProductResult(product.Id);
         }
     }
