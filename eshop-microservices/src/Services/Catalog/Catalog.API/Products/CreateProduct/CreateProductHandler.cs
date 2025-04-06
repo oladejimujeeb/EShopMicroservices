@@ -20,12 +20,11 @@ namespace Catalog.API.Products.CreateProduct
         }
     }
 
-    internal class CreateProductCommandHandler (IDocumentSession session, ILogger<CreateProductCommandHandler> logger /*IValidator<CreateProductCommand> validator*/) : ICommandHandler<CreateProductCommand, CreateProductResult>
+    internal class CreateProductCommandHandler (IDocumentSession session /*IValidator<CreateProductCommand> validator*/): ICommandHandler<CreateProductCommand, CreateProductResult>
     {
         public async Task<CreateProductResult> Handle(CreateProductCommand command, CancellationToken cancellationToken)
         {
             //Business logic to create product
-            logger.LogInformation("CreateProductCommandHandler. Handle call with {@command}", command);
             var product = new Product 
             {
                 Category = command.Category,

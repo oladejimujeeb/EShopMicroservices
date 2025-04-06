@@ -1,6 +1,3 @@
-using BuildingBlocks.Behaviours;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(Program).Assembly;
@@ -9,12 +6,14 @@ builder.Services.AddMediatR(config =>
 {
     config.RegisterServicesFromAssembly(assembly);
     config.AddOpenBehavior(typeof(ValidationBehaviour<,>));
+    config.AddOpenBehavior(typeof(LoggingBehavior<,>));
 });
 
 builder.Services.AddMarten(options => 
 {
     options.Connection(builder.Configuration.GetConnectionString("Database")!);
 }).UseLightweightSessions();
+builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 builder.Services.AddCarter();
 
 //builder.Services.AddEndpointsApiExplorer();
@@ -36,30 +35,5 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.MapCarter();
-
-app.UseExceptionHandler(exceptionHandlerApp => 
-{
-    exceptionHandlerApp.Run(async context => 
-    {
-        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
-        if (exception is null)
-            return;
-        var problemDetail = new ProblemDetails()
-        {
-            Detail = exception.StackTrace,
-            Status = StatusCodes.Status500InternalServerError,
-             Title = exception.Message
-        };
-
-        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-        logger.LogError(exception,exception.Message);
-
-        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        context.Response.ContentType = "application/problem+json";
-
-        await context.Response.WriteAsJsonAsync(problemDetail);
-    });
-});
-
-
+app.UseExceptionHandler(e => { });
 app.Run();

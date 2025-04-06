@@ -11,11 +11,10 @@ namespace Catalog.API.Products.DeleteProduct
             RuleFor(d=>d.id).NotEmpty().WithMessage("Product Id cannot be null");
         }
     }
-    internal class DeleteProductHandler(IDocumentSession session, ILogger<DeleteProductHandler> logger) : ICommandHandler<DeleteProductCommand, DeleteProductResult>
+    internal class DeleteProductHandler(IDocumentSession session) : ICommandHandler<DeleteProductCommand, DeleteProductResult>
     {
         public async Task<DeleteProductResult> Handle(DeleteProductCommand command, CancellationToken cancellationToken)
         {
-            logger.LogInformation("DeleteProductResult. Handle call with {@command}", command);
             session.Delete<Product>(command.id);
             await session.SaveChangesAsync(cancellationToken);
             return new DeleteProductResult(true);
