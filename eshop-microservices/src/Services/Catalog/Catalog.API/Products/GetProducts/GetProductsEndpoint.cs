@@ -4,15 +4,17 @@ using OpenTelemetry.Trace;
 
 namespace Catalog.API.Products.GetProducts
 {
+    public record GetProductRequest(int? pageNumber, int? pagesize);
     public record GetProductResponse(IEnumerable<Product>Products);
 
     public class GetProductsEndpoint : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            app.MapGet("/products", async (ISender sender) =>
+            app.MapGet("/products",async ([AsParameters] GetProductRequest request,ISender sender) =>
             {
-                var result = await sender.Send(new GetProductsQuery());
+                var query = new GetProductsQuery(request.pageNumber, request.pagesize); 
+                var result = await sender.Send(query);
                 var resonpse = result.Adapt<GetProductResponse>();
                 return Results.Ok(resonpse);
             }).

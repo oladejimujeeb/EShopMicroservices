@@ -1,5 +1,7 @@
 
 using Catalog.API.Data;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(Program).Assembly;
@@ -23,7 +25,7 @@ if(builder.Environment.IsDevelopment())
     builder.Services.InitializeMartenWith<CatalogInitialData>();
 }
 
-//builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -34,6 +36,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 builder.Services.AddValidatorsFromAssembly(assembly);
+builder.Services.AddHealthChecks().AddNpgSql(builder.Configuration.GetConnectionString("Database")!);
 var app = builder.Build();
 //Configure Request Pipeline
 if (app.Environment.IsDevelopment())
@@ -44,4 +47,9 @@ if (app.Environment.IsDevelopment())
 
 app.MapCarter();
 app.UseExceptionHandler(e => { });
+app.UseHealthChecks("/health",
+    new HealthCheckOptions
+    {
+        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    });
 app.Run();
